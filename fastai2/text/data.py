@@ -9,10 +9,11 @@ from ..data.all import *
 from .core import *
 
 # Cell
-def make_vocab(count, min_freq=3, max_vocab=60000):
+def make_vocab(count, min_freq=3, max_vocab=60000, special_toks=None):
     "Create a vocab of `max_vocab` size from `Counter` `count` with items present more than `min_freq`"
     vocab = [o for o,c in count.most_common(max_vocab) if c >= min_freq]
-    for o in reversed(defaults.text_spec_tok): #Make sure all special tokens are in the vocab
+    special_toks = ifnone(special_toks, defaults.text_spec_tok)
+    for o in reversed(special_toks): #Make sure all special tokens are in the vocab
         if o in vocab: vocab.remove(o)
         vocab.insert(0, o)
     vocab = vocab[:max_vocab]
@@ -22,22 +23,27 @@ def make_vocab(count, min_freq=3, max_vocab=60000):
 class TensorText(TensorBase):   pass
 class LMTensorText(TensorText): pass
 
+TensorText.__doc__ = "Semantic type for a tensor representing text"
+TensorText.__doc__ = "Semantic type for a tensor representing text in language modeling"
+
 # Cell
 class Numericalize(Transform):
     "Reversible transform of tokenized texts to numericalized ids"
-    def __init__(self, vocab=None, min_freq=3, max_vocab=60000):
-        store_attr(self, 'vocab,min_freq,max_vocab')
+    def __init__(self, vocab=None, min_freq=3, max_vocab=60000, special_toks=None, pad_tok=None):
+        store_attr(self, 'vocab,min_freq,max_vocab,special_toks,pad_tok')
         self.o2i = None if vocab is None else defaultdict(int, {v:k for k,v in enumerate(vocab)})
 
     def setups(self, dsets):
         if dsets is None: return
         if self.vocab is None:
-            count = dsets.counter if hasattr(dsets, 'counter') else Counter(p for o in dsets for p in o)
-            self.vocab = make_vocab(count, min_freq=self.min_freq, max_vocab=self.max_vocab)
+            count = dsets.counter if getattr(dsets, 'counter', None) is not None else Counter(p for o in dsets for p in o)
+            if self.special_toks is None and hasattr(dsets, 'special_toks'):
+                self.special_toks = dsets.special_toks
+            self.vocab = make_vocab(count, min_freq=self.min_freq, max_vocab=self.max_vocab, special_toks=self.special_toks)
             self.o2i = defaultdict(int, {v:k for k,v in enumerate(self.vocab) if v != 'xxfake'})
 
     def encodes(self, o): return TensorText(tensor([self.o2i  [o_] for o_ in o]))
-    def decodes(self, o): return L(self.vocab[o_] for o_ in o if self.vocab[o_] != PAD)
+    def decodes(self, o): return L(self.vocab[o_] for o_ in o if self.vocab[o_] != self.pad_tok)
 
 # Cell
 def _maybe_first(o): return o[0] if isinstance(o, tuple) else o
@@ -57,9 +63,10 @@ def _get_lengths(ds):
     return tok.get_lengths(ds.items)
 
 # Cell
-#TODO: add backward
+@log_args(but_as=TfmdDL.__init__)
 @delegates()
 class LMDataLoader(TfmdDL):
+    "A `DataLoader` suitable for language modeling"
     def __init__(self, dataset, lens=None, cache=2, bs=64, seq_len=72, num_workers=0, **kwargs):
         self.items = ReindexCollection(dataset, cache=cache, tfm=_maybe_first)
         self.seq_len = seq_len
@@ -89,15 +96,10 @@ class LMDataLoader(TfmdDL):
         return LMTensorText(txt[:-1]),txt[1:]
 
     @delegates(TfmdDL.new)
-    def new(self, dataset=None, seq_len=72, **kwargs):
+    def new(self, dataset=None, seq_len=None, **kwargs):
         lens = self.lens.coll if dataset is None else None
+        seq_len = self.seq_len if seq_len is None else seq_len
         return super().new(dataset=dataset, lens=lens, seq_len=seq_len, **kwargs)
-
-# Cell
-@patch
-def truncate(self:TitledStr, n):
-    words = self.split(' ')[:n]
-    return TitledStr(' '.join(words))
 
 # Cell
 @typedispatch
@@ -116,7 +118,7 @@ def show_batch(x: LMTensorText, y, samples, ctxs=None, max_n=10, trunc_at=150, *
 
 # Cell
 def pad_input(samples, pad_idx=1, pad_fields=0, pad_first=False, backwards=False):
-    "Function that collect samples and adds padding. Flips token order if needed"
+    "Function that collect `samples` and adds padding"
     pad_fields = L(pad_fields)
     max_len_l = pad_fields.map(lambda f: max([len(s[f]) for s in samples]))
     if backwards: pad_first = not pad_first
@@ -132,6 +134,7 @@ def pad_input(samples, pad_idx=1, pad_fields=0, pad_first=False, backwards=False
 
 # Cell
 def pad_input_chunk(samples, pad_idx=1, pad_first=True, seq_len=72):
+    "Pad `samples` by adding padding by chunks of size `seq_len`"
     max_len = max([len(s[0]) for s in samples])
     def _f(x):
         l = max_len - x.shape[0]
@@ -146,6 +149,7 @@ def _default_sort(x): return len(x[0])
 
 @delegates(TfmdDL)
 class SortedDL(TfmdDL):
+    "A `DataLoader` that goes throught the item in the order given by `sort_func`"
     def __init__(self, dataset, sort_func=None, res=None, **kwargs):
         super().__init__(dataset, **kwargs)
         self.sort_func = _default_sort if sort_func is None else sort_func
@@ -180,31 +184,35 @@ class SortedDL(TfmdDL):
 
 # Cell
 class TextBlock(TransformBlock):
+    "A `TransformBlock` for texts"
     @delegates(Numericalize.__init__)
     def __init__(self, tok_tfm, vocab=None, is_lm=False, seq_len=72, **kwargs):
         return super().__init__(type_tfms=[tok_tfm, Numericalize(vocab, **kwargs)],
                                 dl_type=LMDataLoader if is_lm else SortedDL,
-                                dls_kwargs={} if is_lm else {'before_batch': partial(pad_input_chunk, seq_len=seq_len)})
+                                dls_kwargs={'seq_len': seq_len} if is_lm else {'before_batch': partial(pad_input_chunk, seq_len=seq_len)})
 
     @classmethod
     @delegates(Tokenizer.from_df, keep=True)
     def from_df(cls, text_cols, vocab=None, is_lm=False, seq_len=72, min_freq=3, max_vocab=60000, **kwargs):
+        "Build a `TextBlock` from a dataframe using `text_cols`"
         return cls(Tokenizer.from_df(text_cols, **kwargs), vocab=vocab, is_lm=is_lm, seq_len=seq_len,
                    min_freq=min_freq, max_vocab=max_vocab)
 
     @classmethod
     @delegates(Tokenizer.from_folder, keep=True)
     def from_folder(cls, path, vocab=None, is_lm=False, seq_len=72, min_freq=3, max_vocab=60000, **kwargs):
+        "Build a `TextBlock` from a `path`"
         return cls(Tokenizer.from_folder(path, **kwargs), vocab=vocab, is_lm=is_lm, seq_len=seq_len,
                    min_freq=min_freq, max_vocab=max_vocab)
 
 # Cell
 class TextDataLoaders(DataLoaders):
+    "Basic wrapper around several `DataLoader`s with factory methods for NLP problems"
     @classmethod
     @delegates(DataLoaders.from_dblock)
     def from_folder(cls, path, train='train', valid='valid', valid_pct=None, seed=None, vocab=None, text_vocab=None, is_lm=False,
                     tok_tfm=None, seq_len=72, **kwargs):
-        "Create from imagenet style dataset in `path` with `train`,`valid`,`test` subfolders (or provide `valid_pct`)."
+        "Create from imagenet style dataset in `path` with `train` and `valid` subfolders (or provide `valid_pct`)"
         splitter = GrandparentSplitter(train_name=train, valid_name=valid) if valid_pct is None else RandomSplitter(valid_pct, seed=seed)
         blocks = [TextBlock.from_folder(path, text_vocab, is_lm, seq_len) if tok_tfm is None else TextBlock(tok_tfm, text_vocab, is_lm, seq_len)]
         if not is_lm: blocks.append(CategoryBlock(vocab=vocab))
@@ -219,19 +227,21 @@ class TextDataLoaders(DataLoaders):
     @delegates(DataLoaders.from_dblock)
     def from_df(cls, df, path='.', valid_pct=0.2, seed=None, text_col=0, label_col=1, label_delim=None, y_block=None,
                 text_vocab=None, is_lm=False, valid_col=None, tok_tfm=None, seq_len=72, **kwargs):
+        "Create from `df` in `path` with `valid_pct`"
         blocks = [TextBlock.from_df(text_col, text_vocab, is_lm, seq_len) if tok_tfm is None else TextBlock(tok_tfm, text_vocab, is_lm, seq_len)]
         if y_block is None and not is_lm:
             blocks.append(MultiCategoryBlock if is_listy(label_col) and len(label_col) > 1 else CategoryBlock)
         if y_block is not None and not is_lm: blocks += (y_block if is_listy(y_block) else [y_block])
         splitter = RandomSplitter(valid_pct, seed=seed) if valid_col is None else ColSplitter(valid_col)
         dblock = DataBlock(blocks=blocks,
-                           get_x=ColReader(text_col),
+                           get_x=ColReader("text"),
                            get_y=None if is_lm else ColReader(label_col, label_delim=label_delim),
                            splitter=splitter)
         return cls.from_dblock(dblock, df, path=path, seq_len=seq_len, **kwargs)
 
     @classmethod
     def from_csv(cls, path, csv_fname='labels.csv', header='infer', delimiter=None, **kwargs):
+        "Create from `csv` file in `path/csv_fname`"
         df = pd.read_csv(Path(path)/csv_fname, header=header, delimiter=delimiter)
         return cls.from_df(df, path=path, **kwargs)
 

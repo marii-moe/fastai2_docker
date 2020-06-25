@@ -4,8 +4,8 @@ __all__ = ['UNK', 'PAD', 'BOS', 'EOS', 'FLD', 'TK_REP', 'TK_WREP', 'TK_UP', 'TK_
            'rm_useless_spaces', 'replace_rep', 'replace_wrep', 'fix_html', 'replace_all_caps', 'replace_maj',
            'lowercase', 'replace_space', 'BaseTokenizer', 'SpacyTokenizer', 'WordTokenizer', 'TokenizeBatch',
            'tokenize1', 'parallel_tokenize', 'fn_counter_pkl', 'fn_lengths_pkl', 'tokenize_folder',
-           'read_tokenized_file', 'tokenize_files', 'tokenize_df', 'tokenize_csv', 'load_tokenized_csv',
-           'get_tokenizer', 'Tokenizer', 'eu_langs', 'SentencePieceTokenizer', 'SubwordTokenizer']
+           'read_tokenized_file', 'tokenize_files', 'tokenize_texts', 'tokenize_df', 'tokenize_csv',
+           'load_tokenized_csv', 'get_tokenizer', 'Tokenizer', 'eu_langs', 'SentencePieceTokenizer', 'SubwordTokenizer']
 
 # Cell
 from ..torch_basics import *
@@ -16,7 +16,6 @@ import spacy,html
 from spacy.symbols import ORTH
 
 # Cell
-#special tokens
 UNK, PAD, BOS, EOS, FLD, TK_REP, TK_WREP, TK_UP, TK_MAJ = "xxunk xxpad xxbos xxeos xxfld xxrep xxwrep xxup xxmaj".split()
 
 # Cell
@@ -110,9 +109,9 @@ class BaseTokenizer():
 class SpacyTokenizer():
     "Spacy tokenizer for `lang`"
     def __init__(self, lang='en', special_toks=None, buf_sz=5000):
-        special_toks = ifnone(special_toks, defaults.text_spec_tok)
+        self.special_toks = ifnone(special_toks, defaults.text_spec_tok)
         nlp = spacy.blank(lang, disable=["parser", "tagger", "ner"])
-        for w in special_toks: nlp.tokenizer.add_special_case(w, [{ORTH: w}])
+        for w in self.special_toks: nlp.tokenizer.add_special_case(w, [{ORTH: w}])
         self.pipe,self.buf_sz = nlp.pipe,buf_sz
 
     def __call__(self, items):
@@ -171,11 +170,11 @@ def tokenize_folder(path, extensions=None, folders=None, output_dir=None, n_work
 def read_tokenized_file(f): return L(f.read().split(' '))
 
 # Cell
-def tokenize_files(files, output_dir, output_names=None, n_workers=defaults.cpus, rules=None, tok_func=SpacyTokenizer,
+def tokenize_files(files, path, output_dir, output_names=None, n_workers=defaults.cpus, rules=None, tok_func=SpacyTokenizer,
                    encoding='utf8', **tok_kwargs):
     "Tokenize text `files` in parallel using `n_workers`"
-    if output_names is None: output_names = L(f'{i}.txt' for i in range_of(files))
     output_dir = Path(output_dir)
+    if output_names is None: output_names = L(output_dir/f.relative_to(path) for f in files)
     rules = partial(Path.read, encoding=encoding) + L(ifnone(rules, defaults.text_proc_rules.copy()))
 
     lengths = (output_dir/fn_lengths_pkl).load() if (output_dir/fn_lengths_pkl).exists() else {}
@@ -183,7 +182,7 @@ def tokenize_files(files, output_dir, output_names=None, n_workers=defaults.cpus
     for i,tok in parallel_tokenize(files, tok_func, rules, as_gen=True, n_workers=n_workers, **tok_kwargs):
         out = output_dir/output_names[i]
         out.write(' '.join(tok))
-        lengths[output_names[i]] = len(tok)
+        lengths[str(files[i].relative_to(path))] = len(tok)
         counter.update(tok)
 
     (output_dir/fn_lengths_pkl).save(lengths)
@@ -196,6 +195,14 @@ def _join_texts(df, mark_fields=False):
     for i in range(1,len(df.columns)):
         text_col += (f' {FLD} {i+1} ' if mark_fields else ' ') + df.iloc[:,i].astype(str)
     return text_col.values
+
+# Cell
+def tokenize_texts(texts, n_workers=defaults.cpus, rules=None, tok_func=SpacyTokenizer, **tok_kwargs):
+    "Tokenize `texts` in parallel using `n_workers`"
+    rules = L(ifnone(rules, defaults.text_proc_rules.copy()))
+    outputs = L(parallel_tokenize(texts, tok_func, rules, n_workers=n_workers, **tok_kwargs)
+               ).sorted().itemgot(1)
+    return outputs
 
 # Cell
 def tokenize_df(df, text_cols, n_workers=defaults.cpus, rules=None, mark_fields=None,
@@ -268,7 +275,7 @@ class Tokenizer(Transform):
     def from_folder(cls, path, tok_func=SpacyTokenizer, rules=None, **kwargs):
         path = Path(path)
         output_dir = Path(ifnone(kwargs.get('output_dir'), path.parent/f'{path.name}_tok'))
-        if not output_dir.exists(): tokenize_folder(path, rules=rules, **kwargs)
+        if not output_dir.exists(): tokenize_folder(path, tok_func=tok_func, rules=rules, **kwargs)
         res = cls(get_tokenizer(tok_func, **kwargs), counter=(output_dir/fn_counter_pkl).load(),
                   lengths=(output_dir/fn_lengths_pkl).load(), rules=rules, mode='folder')
         res.path,res.output_dir = path,output_dir
@@ -301,6 +308,9 @@ class Tokenizer(Transform):
 
     def decodes(self, o): return TitledStr(self.sep.join(o))
 
+    @property
+    def special_toks(self,): return self.tokenizer.special_toks
+
 # Cell
 eu_langs = ["bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "ga", "hr", "hu",
             "it","lt","lv","mt","nl","pl","pt","ro","sk","sl","sv"] # all European langs
@@ -312,7 +322,7 @@ class SentencePieceTokenizer():#TODO: pass the special tokens symbol to sp
                  model_type='unigram', char_coverage=None, cache_dir='tmp'):
         try: from sentencepiece import SentencePieceTrainer,SentencePieceProcessor
         except ImportError:
-            raise Exception('sentencepiece module is missing: run `pip install sentencepiece`')
+            raise Exception('sentencepiece module is missing: run `pip install sentencepiece!=0.1.90,!=0.1.91`')
         self.sp_model,self.cache_dir = sp_model,Path(cache_dir)
         self.vocab_sz,self.max_vocab_sz,self.model_type = vocab_sz,max_vocab_sz,model_type
         self.char_coverage = ifnone(char_coverage, 0.99999 if lang in eu_langs else 0.9998)
@@ -338,11 +348,10 @@ class SentencePieceTokenizer():#TODO: pass the special tokens symbol to sp
         from sentencepiece import SentencePieceTrainer
         vocab_sz = self._get_vocab_sz(raw_text_path) if self.vocab_sz is None else self.vocab_sz
         spec_tokens = ['\u2581'+s for s in self.special_toks]
-        q = '\"'
         SentencePieceTrainer.Train(" ".join([
-            f"--input={q}{raw_text_path}{q} --vocab_size={vocab_sz} --model_prefix={q}{self.cache_dir/'spm'}{q}",
+            f"--input={raw_text_path} --vocab_size={vocab_sz} --model_prefix={self.cache_dir/'spm'}",
             f"--character_coverage={self.char_coverage} --model_type={self.model_type}",
-            f"--unk_id={len(spec_tokens)} --pad_id=-1 --bos_id=-1 --eos_id=-1",
+            f"--unk_id={len(spec_tokens)} --pad_id=-1 --bos_id=-1 --eos_id=-1 --minloglevel=2",
             f"--user_defined_symbols={','.join(spec_tokens)}"]))
         raw_text_path.unlink()
         return self.cache_dir/'spm.model'
@@ -358,6 +367,7 @@ class SentencePieceTokenizer():#TODO: pass the special tokens symbol to sp
         sp_model = self.train(raw_text_path)
         self.tok = SentencePieceProcessor()
         self.tok.Load(str(sp_model))
+        return {'sp_model': sp_model}
 
     def __call__(self, items):
         for t in items: yield self.tok.EncodeAsPieces(t)

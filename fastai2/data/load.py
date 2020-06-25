@@ -56,6 +56,7 @@ def fa_convert(t):
 class SkipItemException(Exception): pass
 
 # Cell
+@log_args(but='dataset,wif,create_batch,create_batches,create_item,retain,get_idxs,sample,shuffle_fn,do_batch')
 @funcs_kwargs
 class DataLoader(GetAttr):
     _noop_methods = 'wif before_iter after_item before_batch after_batch after_iter'.split()
@@ -73,7 +74,7 @@ class DataLoader(GetAttr):
             try: n = len(dataset)
             except TypeError: pass
         store_attr(self, 'dataset,bs,shuffle,drop_last,indexed,n,pin_memory,timeout,device')
-        self.rng,self.nw,self.offs = random.Random(),1,0
+        self.rng,self.nw,self.offs = random.Random(random.randint(0,2**32-1)),1,0
         self.fake_l = _FakeLoader(self, pin_memory, num_workers, timeout)
 
     def __len__(self):

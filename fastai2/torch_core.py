@@ -8,10 +8,10 @@ __all__ = ['progress_bar', 'master_bar', 'subplots', 'show_image', 'show_titled_
            'ShowTitle', 'TitledInt', 'TitledFloat', 'TitledStr', 'TitledTuple', 'get_empty_df', 'display_df',
            'get_first', 'one_param', 'item_find', 'find_device', 'find_bs', 'Module', 'get_model', 'one_hot',
            'one_hot_decode', 'params', 'trainable_params', 'norm_types', 'bn_bias_params', 'batch_to_samples', 'logit',
-           'num_distrib', 'rank_distrib', 'distrib_barrier', 'base_doc', 'doc', 'to_image', 'make_cross_image',
-           'show_image_batch', 'requires_grad', 'init_default', 'cond_init', 'apply_leaf', 'apply_init',
-           'set_num_threads', 'ProcessPoolExecutor', 'parallel', 'run_procs', 'parallel_gen', 'script_use_ctx',
-           'script_save_ctx', 'script_fwd', 'script_bwd', 'grad_module', 'flatten_check']
+           'num_distrib', 'rank_distrib', 'distrib_barrier', 'base_doc', 'doc', 'nested_reorder', 'to_image',
+           'make_cross_image', 'show_image_batch', 'requires_grad', 'init_default', 'cond_init', 'apply_leaf',
+           'apply_init', 'set_num_threads', 'ProcessPoolExecutor', 'parallel', 'run_procs', 'parallel_gen',
+           'script_use_ctx', 'script_save_ctx', 'script_fwd', 'script_bwd', 'grad_module', 'flatten_check']
 
 # Cell
 from .imports import *
@@ -26,8 +26,8 @@ if torch.cuda.is_available():
 
 # Cell
 @delegates(plt.subplots, keep=True)
-def subplots(nrows=1, ncols=1, figsize=None, imsize=4, **kwargs):
-    if figsize is None: figsize=(imsize*ncols,imsize*nrows)
+def subplots(nrows=1, ncols=1, figsize=None, imsize=3, add_vert=0, **kwargs):
+    if figsize is None: figsize=(ncols*imsize, nrows*imsize+add_vert)
     fig,ax = plt.subplots(nrows, ncols, figsize=figsize, **kwargs)
     if nrows*ncols==1: ax = array([ax])
     return fig,ax
@@ -63,11 +63,11 @@ def show_titled_image(o, **kwargs):
 
 # Cell
 @delegates(subplots)
-def show_images(ims, rows=1, titles=None, **kwargs):
+def show_images(ims, nrows=1, ncols=None, titles=None, **kwargs):
     "Show all images `ims` as subplots with `rows` using `titles`"
-    cols = int(math.ceil(len(ims)/rows))
+    if ncols is None: ncols = int(math.ceil(len(ims)/nrows))
     if titles is None: titles = [None]*len(ims)
-    axs = subplots(rows,cols,**kwargs)[1].flat
+    axs = subplots(nrows, ncols, **kwargs)[1].flat
     for im,t,ax in zip(ims, titles, axs): show_image(im, ax=ax, title=t)
 
 # Cell
@@ -274,7 +274,7 @@ def _patch_tb():
         return _f
 
     t = tensor([1])
-    skips = 'as_subclass __getitem__ __class__ __deepcopy__ __delattr__ __dir__ __doc__ __getattribute__ __hash__ __init__ \
+    skips = 'as_subclass imag real __getitem__ __class__ __deepcopy__ __delattr__ __dir__ __doc__ __getattribute__ __hash__ __init__ \
         __init_subclass__ __new__ __reduce__ __reduce_ex__ __repr__ __module__ __setstate__'.split()
 
     for fn in dir(t):
@@ -422,6 +422,13 @@ add_docs(TitledInt, "An `int` with `show`"); add_docs(TitledStr, "An `str` with 
 add_docs(TitledFloat, "A `float` with `show`"); add_docs(TitledTuple, "A `Tuple` with `show`")
 
 # Cell
+@patch
+def truncate(self:TitledStr, n):
+    "Truncate self to `n`"
+    words = self.split(' ')[:n]
+    return TitledStr(' '.join(words))
+
+# Cell
 if not hasattr(pd.DataFrame,'_old_init'): pd.DataFrame._old_init = pd.DataFrame.__init__
 
 # Cell
@@ -563,7 +570,7 @@ def rank_distrib():
 # Cell
 def distrib_barrier():
     "Place a synchronization barrier in distributed training so that ALL sub-processes in the pytorch process group must arrive here before proceeding."
-    if num_distrib() > 1: torch.distributed.barrier()
+    if num_distrib() > 1 and torch.distributed.is_initialized(): torch.distributed.barrier()
 
 # Cell
 # Saving arrays requires pytables - optional dependency
@@ -600,6 +607,14 @@ def doc(elt):
         from nbdev.showdoc import doc
         doc(elt)
     except: base_doc(elt)
+
+# Cell
+def nested_reorder(t, idxs):
+    "Reorder all tensors in `t` using `idxs`"
+    if isinstance(t, (Tensor,L)): return t[idxs]
+    elif is_listy(t): return type(t)(nested_reorder(t_, idxs) for t_ in t)
+    if t is None: return t
+    raise TypeError(f"Expected tensor, tuple, list or L but got {type(t)}")
 
 # Cell
 def to_image(x):

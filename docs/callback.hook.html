@@ -19,14 +19,23 @@ description: "Callback and helper function to add hooks in models"
 -->
 
 <div class="container" id="notebook-container">
-    {% raw %}
         
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -40,6 +49,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -53,9 +66,11 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="What-are-hooks?">What are hooks?<a class="anchor-link" href="#What-are-hooks?">&#182;</a></h2>
+<h2 id="What-are-hooks?">What are hooks?<a class="anchor-link" href="#What-are-hooks?"> </a></h2>
 </div>
 </div>
 </div>
@@ -67,6 +82,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -106,6 +123,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Backward hooks are functions that take three arguments: the layer it's applied to, the gradients of the loss with respect to the input, and the gradients with respect to the output.</p>
@@ -113,6 +132,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -154,6 +175,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Hooks can change the input/output of a layer, or the gradients, print values or shapes. If you want to store something related to theses inputs/outputs, it's best to have your hook associated to a class so that it can put it in the state of an instance of that class.</p>
@@ -161,9 +184,15 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -185,6 +214,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>This will be called during the forward pass if <code>is_forward=True</code>, the backward pass otherwise, and will optionally <code>detach</code>, <code>gather</code> and put on the <code>cpu</code> the (gradient of the) input/output of the model before passing them to <code>hook_func</code>. The result of <code>hook_func</code> will be stored in the <code>stored</code> attribute of the <a href="/callback.hook#Hook"><code>Hook</code></a>.</p>
@@ -192,6 +223,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -208,6 +241,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -229,6 +266,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -250,6 +291,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>{% include note.html content='It&#8217;s important to properly remove your hooks for your model when you&#8217;re done to avoid them being called again next time your model is applied to some inputs, and to free the memory that go with their state.' %}</p>
@@ -257,6 +300,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -266,7 +311,7 @@ description: "Callback and helper function to add hooks in models"
 <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="n">hook</span> <span class="o">=</span> <span class="n">Hook</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">example_forward_hook</span><span class="p">)</span>
-<span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{tst_model}</span><span class="s2"> (</span><span class="si">{x}</span><span class="s2">,) {y.detach()}&quot;</span><span class="p">)</span>
+<span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tst_model</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">,) </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">hook</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
 <span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 </pre></div>
@@ -276,9 +321,11 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Context-Manager">Context Manager<a class="anchor-link" href="#Context-Manager">&#182;</a></h3>
+<h3 id="Context-Manager">Context Manager<a class="anchor-link" href="#Context-Manager"> </a></h3>
 </div>
 </div>
 </div>
@@ -289,6 +336,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -310,6 +359,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -331,6 +384,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -340,7 +397,7 @@ description: "Callback and helper function to add hooks in models"
 <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">Hook</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">example_forward_hook</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
-    <span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{tst_model}</span><span class="s2"> (</span><span class="si">{x}</span><span class="s2">,) {y.detach()}&quot;</span><span class="p">)</span>
+    <span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tst_model</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">,) </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">test_stdout</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tst_model</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -349,9 +406,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -373,6 +438,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The activations stored are the gradients if <code>grad=True</code>, otherwise the output of <a href="/layers#module"><code>module</code></a>. If <code>detach=True</code> they are detached from their history, and if <code>cpu=True</code>, they're put on the CPU.</p>
@@ -380,6 +447,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -404,13 +473,16 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#cuda</span>
-<span class="k">with</span> <span class="n">hook_output</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">hook_output</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">tst_model</span><span class="o">.</span><span class="n">cuda</span><span class="p">()(</span><span class="n">x</span><span class="o">.</span><span class="n">cuda</span><span class="p">())</span>
     <span class="n">test_eq</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">stored</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">))</span>
 </pre></div>
@@ -420,9 +492,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -444,6 +524,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -464,6 +548,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -483,6 +571,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -504,9 +596,11 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Context-Manager">Context Manager<a class="anchor-link" href="#Context-Manager">&#182;</a></h3>
+<h3 id="Context-Manager">Context Manager<a class="anchor-link" href="#Context-Manager"> </a></h3>
 </div>
 </div>
 </div>
@@ -517,6 +611,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -538,6 +634,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -559,6 +659,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -578,9 +682,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -602,6 +714,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The activations stored are the gradients if <code>grad=True</code>, otherwise the output of <code>modules</code>. If <code>detach=True</code> they are detached from their history, and if <code>cpu=True</code>, they're put on the CPU.</p>
@@ -609,6 +723,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -641,13 +757,16 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#cuda</span>
-<span class="k">with</span> <span class="n">hook_outputs</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">hook_outputs</span><span class="p">(</span><span class="n">tst_model</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">tst_model</span><span class="o">.</span><span class="n">cuda</span><span class="p">()(</span><span class="n">x</span><span class="o">.</span><span class="n">cuda</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">stored</span><span class="p">:</span> <span class="n">test_eq</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">))</span>
 </pre></div>
@@ -657,9 +776,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -681,9 +808,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -705,6 +840,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -719,9 +858,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -743,6 +890,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -759,6 +910,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>To make hooks easy to use, we wrapped a version in a Callback where you just have to implement a <code>hook</code> function (plus any element you might need).</p>
@@ -766,9 +919,15 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -790,6 +949,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -805,9 +968,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -817,9 +988,9 @@ description: "Callback and helper function to add hooks in models"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="HookCallback" class="doc_header"><code>class</code> <code>HookCallback</code><a href="https://github.com/fastai/fastai2/tree/master/fastai2/callback/hook.py#L106" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>HookCallback</code>(<strong><code>modules</code></strong>=<em><code>None</code></em>, <strong><code>every</code></strong>=<em><code>None</code></em>, <strong><code>remove_end</code></strong>=<em><code>True</code></em>, <strong><code>is_forward</code></strong>=<em><code>True</code></em>, <strong><code>detach</code></strong>=<em><code>True</code></em>, <strong><code>cpu</code></strong>=<em><code>True</code></em>, <strong><code>hook</code></strong>=<em><code>None</code></em>) :: <a href="/callback_core#Callback"><code>Callback</code></a></p>
+<h2 id="HookCallback" class="doc_header"><code>class</code> <code>HookCallback</code><a href="https://github.com/fastai/fastai2/tree/master/fastai2/callback/hook.py#L106" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>HookCallback</code>(<strong><code>modules</code></strong>=<em><code>None</code></em>, <strong><code>every</code></strong>=<em><code>None</code></em>, <strong><code>remove_end</code></strong>=<em><code>True</code></em>, <strong><code>is_forward</code></strong>=<em><code>True</code></em>, <strong><code>detach</code></strong>=<em><code>True</code></em>, <strong><code>cpu</code></strong>=<em><code>True</code></em>, <strong><code>hook</code></strong>=<em><code>None</code></em>) :: <a href="/callback.core#Callback"><code>Callback</code></a></p>
 </blockquote>
-<p><a href="/callback_core#Callback"><code>Callback</code></a> that can be used to register hooks on <code>modules</code></p>
+<p><a href="/callback.core#Callback"><code>Callback</code></a> that can be used to register hooks on <code>modules</code></p>
 
 </div>
 
@@ -829,6 +1000,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>You can either subclass and implement a <code>hook</code> function (along with any event you want) or pass that a <code>hook</code> function when initializing. Such a function needs to take three argument: a layer, input and output (for a backward hook, input means gradient with respect to the inputs, output, gradient with respect to the output) and can either modify them or update the state according to them.</p>
@@ -838,6 +1011,8 @@ description: "Callback and helper function to add hooks in models"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -870,6 +1045,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -906,6 +1085,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -927,6 +1110,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -948,15 +1135,23 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Model-summary">Model summary<a class="anchor-link" href="#Model-summary">&#182;</a></h2>
+<h2 id="Model-summary">Model summary<a class="anchor-link" href="#Model-summary"> </a></h2>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -978,6 +1173,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -998,9 +1197,17 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -1022,6 +1229,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1042,13 +1253,16 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Test for multiple inputs model</span>
-<span class="k">class</span> <span class="nc">_2InpModel</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">_2InpModel</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seq</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -1072,12 +1286,24 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -1099,6 +1325,10 @@ description: "Callback and helper function to add hooks in models"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1147,9 +1377,17 @@ Total non-trainable params: 100
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -1171,6 +1409,10 @@ Total non-trainable params: 100
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1229,13 +1471,16 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Test for multiple output</span>
-<span class="k">class</span> <span class="nc">_NOutModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">_NOutModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">):</span>
         <span class="n">seq_len</span><span class="p">,</span> <span class="n">bs</span><span class="p">,</span> <span class="n">hid_size</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">256</span>
         <span class="n">num_layer</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1283,9 +1528,11 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Activation-graphs">Activation graphs<a class="anchor-link" href="#Activation-graphs">&#182;</a></h2>
+<h2 id="Activation-graphs">Activation graphs<a class="anchor-link" href="#Activation-graphs"> </a></h2>
 </div>
 </div>
 </div>
@@ -1296,6 +1543,8 @@ Callbacks:
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1354,6 +1603,10 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -1375,6 +1628,10 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1403,6 +1660,10 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1432,6 +1693,8 @@ Callbacks:
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The first line contains the means of the outputs of the model for each batch in the training set, the second line their standard deviations.</p>
@@ -1439,6 +1702,8 @@ Callbacks:
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -1483,6 +1748,7 @@ Callbacks:
 
 </div>
     {% endraw %}
+
 </div>
  
 

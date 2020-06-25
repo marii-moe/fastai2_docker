@@ -5,8 +5,8 @@ title: Title
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "summary"
-description: "summary"
+
+
 ---
 <!--
 
@@ -19,14 +19,23 @@ description: "summary"
 -->
 
 <div class="container" id="notebook-container">
-    {% raw %}
         
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -40,6 +49,10 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -54,18 +67,30 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="DataLoader">DataLoader<a class="anchor-link" href="#DataLoader"> </a></h2>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -86,13 +111,16 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#e.g. x is int, y is tuple</span>
-<span class="n">t</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)),(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)),(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))]</span>
 <span class="n">test_eq</span><span class="p">(</span><span class="n">fa_collate</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">default_collate</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
 <span class="n">test_eq</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">fa_collate</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">type</span><span class="p">),</span> <span class="p">[</span><span class="n">Tensor</span><span class="p">,</span><span class="nb">tuple</span><span class="p">])</span>
 
@@ -107,9 +135,17 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -130,6 +166,10 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -147,9 +187,17 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -171,9 +219,17 @@ description: "summary"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
@@ -242,6 +298,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Override <code>item</code> and use the default infinite sampler to get a stream of unknown length (<code>stop()</code> when you want to stop the stream).</p>
@@ -249,6 +307,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -274,7 +334,7 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(#12) [0.2029181718165155,0.9363630463376765,0.6015850190373964,0.8951892866269898,0.022101597007143647,0.8795107556157348,0.7400142255000822,0.7064151212089262,0.031416108259866515,0.6090825864020659...]</pre>
+<pre>(#5) [0.014771725872121833,0.442737969598887,0.5174043161959161,0.4786935243450199,0.7019916436842374]</pre>
 </div>
 
 </div>
@@ -283,6 +343,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -303,7 +367,7 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(#0) []</pre>
+<pre>(#4) [4,4,4,4]</pre>
 </div>
 
 </div>
@@ -312,6 +376,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -333,7 +401,7 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(#23) [4,4,4,4,4,4,4,4,4,4...]</pre>
+<pre>(#24) [4,4,4,4,4,4,4,4,4,4...]</pre>
 </div>
 
 </div>
@@ -342,6 +410,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -359,6 +431,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -383,7 +459,7 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(#36) [0.9053344272362951,0.7001863599621895,0.6035029862609306,0.6453813239894789,0.8012882587705233,0.4233633306146043,0.36652522550234645,0.41309064324237743,0.9386269784872716,0.5258497703552616...]</pre>
+<pre>(#8) [0.7443544446552649,0.6935816667551128,0.7728446664672133,0.38622694634190813,0.11620136834408035,0.0526608057414214,0.026778050174270596,0.9358154353466361]</pre>
 </div>
 
 </div>
@@ -392,6 +468,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>If you don't set <code>bs</code>, then <code>dataset</code> is assumed to provide an iterator or a <code>__getitem__</code> that returns a batch.</p>
@@ -399,6 +477,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -432,6 +512,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>If you do set <code>bs</code>, then <code>dataset</code> is assumed to provide an iterator or a <code>__getitem__</code> that returns a single item of a batch.</p>
@@ -439,6 +521,8 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -452,6 +536,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -479,6 +567,10 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -510,11 +602,11 @@ loading order and optional automatic batching (collation) and memory pinning.</p
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>CPU times: user 5.12 ms, sys: 710 µs, total: 5.83 ms
-Wall time: 239 ms
-CPU times: user 18.5 ms, sys: 13.5 ms, total: 32 ms
-Wall time: 166 ms
-CPU times: user 14.1 ms, sys: 31.4 ms, total: 45.5 ms
+<pre>CPU times: user 5.22 ms, sys: 221 µs, total: 5.44 ms
+Wall time: 279 ms
+CPU times: user 18.3 ms, sys: 17.6 ms, total: 35.9 ms
+Wall time: 177 ms
+CPU times: user 19.8 ms, sys: 29.2 ms, total: 49.1 ms
 Wall time: 132 ms
 </pre>
 </div>
@@ -524,6 +616,10 @@ Wall time: 132 ms
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -555,8 +651,8 @@ Wall time: 132 ms
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>CPU times: user 27.7 ms, sys: 18 ms, total: 45.7 ms
-Wall time: 98.8 ms
+<pre>CPU times: user 26.7 ms, sys: 21 ms, total: 47.7 ms
+Wall time: 105 ms
 </pre>
 </div>
 </div>
@@ -565,6 +661,10 @@ Wall time: 98.8 ms
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -589,6 +689,10 @@ Wall time: 98.8 ms
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -611,6 +715,7 @@ Wall time: 98.8 ms
 
 </div>
     {% endraw %}
+
 </div>
  
 

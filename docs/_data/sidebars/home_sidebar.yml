@@ -23,12 +23,18 @@ entries:
           url: /tutorial.vision
         - output: web,pdf
           title: Text tutorial
-          url: /tutorial.ulmfit
+          url: /tutorial.text
+        - output: web,pdf
+          title: Tabular tutorial
+          url: /tutorial.tabular
+        - output: web,pdf
+          title: Collab tutorial
+          url: /tutorial.collab
         title: Beginners
       - output: web
         subfolderitems:
         - output: web,pdf
-          title: Data block examples
+          title: Data block tutorial
           url: /tutorial.datablock
         - output: web,pdf
           title: Imagenette tutorial
@@ -37,8 +43,11 @@ entries:
           title: Pets tutorial
           url: /tutorial.pets
         - output: web,pdf
-          title: UlMFiT tutorial
-          url: /tutorial.ulmfit
+          title: Transformers tutorial
+          url: /tutorial.transformers
+        - output: web,pdf
+          title: Wikitext tutorial
+          url: /tutorial.wikitext
         title: Intermediate
       - output: web
         subfolderitems:
@@ -83,8 +92,14 @@ entries:
           title: Mixup
           url: /callback.mixup
         - output: web,pdf
-          title: Trackers
+          title: Cutmix
+          url: /callback.cutmix
+        - output: web,pdf
+          title: Tracker
           url: /callback.tracker
+        - output: web,pdf
+          title: Training
+          url: /callback.training
         - output: web,pdf
           title: RNN
           url: /callback.rnn

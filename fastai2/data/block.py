@@ -19,9 +19,9 @@ class TransformBlock():
         self.dl_type,self.dls_kwargs = dl_type,({} if dls_kwargs is None else dls_kwargs)
 
 # Cell
-def CategoryBlock(vocab=None, add_na=False):
+def CategoryBlock(vocab=None, sort=True, add_na=False):
     "`TransformBlock` for single-label categorical targets"
-    return TransformBlock(type_tfms=Categorize(vocab=vocab, add_na=add_na))
+    return TransformBlock(type_tfms=Categorize(vocab=vocab, sort=sort, add_na=add_na))
 
 # Cell
 def MultiCategoryBlock(encoded=False, vocab=None, add_na=False):
@@ -30,9 +30,9 @@ def MultiCategoryBlock(encoded=False, vocab=None, add_na=False):
     return TransformBlock(type_tfms=tfm)
 
 # Cell
-def RegressionBlock(c_out=None):
+def RegressionBlock(n_out=None):
     "`TransformBlock` for float targets"
-    return TransformBlock(type_tfms=RegressionSetup(c_out))
+    return TransformBlock(type_tfms=RegressionSetup(c=n_out))
 
 # Cell
 from inspect import isfunction,ismethod
@@ -54,6 +54,7 @@ class DataBlock():
     get_x=get_items=splitter=get_y = None
     blocks,dl_type = (TransformBlock,TransformBlock),TfmdDL
     _methods = 'get_items splitter get_y get_x'.split()
+    _msg = "If you wanted to compose several transforms in your getter don't forget to wrap them in a `Pipeline`."
     def __init__(self, blocks=None, dl_type=None, getters=None, n_inp=None, item_tfms=None, batch_tfms=None, **kwargs):
         blocks = L(self.blocks if blocks is None else blocks)
         blocks = L(b() if callable(b) else b for b in blocks)
@@ -66,15 +67,23 @@ class DataBlock():
         self.dataloaders = delegates(self.dl_type.__init__)(self.dataloaders)
         self.dls_kwargs = merge(*blocks.attrgot('dls_kwargs', {}))
 
-        self.getters = [noop] * len(self.type_tfms) if getters is None else getters
-        if self.get_x: self.getters[0] = self.get_x
-        if self.get_y: self.getters[1] = self.get_y
-        self.n_inp = n_inp
+        self.n_inp = ifnone(n_inp, max(1, len(blocks)-1))
+        self.getters = ifnone(getters, [noop]*len(self.type_tfms))
+        if self.get_x:
+            if len(L(self.get_x)) != self.n_inp:
+                raise ValueError(f'get_x contains {len(L(self.get_x))} functions, but must contain {self.n_inp} (one for each input)\n{self._msg}')
+            self.getters[:self.n_inp] = L(self.get_x)
+        if self.get_y:
+            n_targs = len(self.getters) - self.n_inp
+            if len(L(self.get_y)) != n_targs:
+                raise ValueError(f'get_y contains {len(L(self.get_y))} functions, but must contain {n_targs} (one for each target)\n{self._msg}')
+            self.getters[self.n_inp:] = L(self.get_y)
 
         if kwargs: raise TypeError(f'invalid keyword arguments: {", ".join(kwargs.keys())}')
         self.new(item_tfms, batch_tfms)
 
-    def _combine_type_tfms(self): return L([self.getters, self.type_tfms]).map_zip(lambda g,tt: L(g) + tt)
+    def _combine_type_tfms(self): return L([self.getters, self.type_tfms]).map_zip(
+        lambda g,tt: (g.fs if isinstance(g, Pipeline) else L(g)) + tt)
 
     def new(self, item_tfms=None, batch_tfms=None):
         self.item_tfms  = _merge_tfms(self.default_item_tfms,  item_tfms)
@@ -139,7 +148,8 @@ def _find_fail_collate(s):
 
 # Cell
 @patch
-def summary(self: DataBlock, source, bs=4, **kwargs):
+def summary(self: DataBlock, source, bs=4, show_batch=False, **kwargs):
+    "Steps through the transform pipeline for one batch, and optionally calls `show_batch(**kwargs)` on the transient `Dataloaders`."
     print(f"Setting-up type transforms pipelines")
     dsets = self.datasets(source, verbose=True)
     print("\nBuilding one sample")
@@ -147,7 +157,7 @@ def summary(self: DataBlock, source, bs=4, **kwargs):
         _apply_pipeline(tl.tfms, get_first(dsets.train.items))
     print(f"\nFinal sample: {dsets.train[0]}\n\n")
 
-    dls = self.dataloaders(source, verbose=True)
+    dls = self.dataloaders(source, bs=bs, verbose=True)
     print("\nBuilding one batch")
     if len([f for f in dls.train.after_item.fs if f.name != 'noop'])!=0:
         print("Applying item_tfms to the first sample:")
@@ -178,3 +188,5 @@ def summary(self: DataBlock, source, bs=4, **kwargs):
         b = to_device(b, dls.device)
         b = _apply_pipeline(dls.train.after_batch, b)
     else: print("\nNo batch_tfms to apply")
+
+    if show_batch: dls.show_batch(**kwargs)

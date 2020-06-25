@@ -8,6 +8,7 @@ from .core import *
 from .model import *
 
 # Cell
+@log_args(but_as=Learner.__init__)
 class TabularLearner(Learner):
     "`Learner` for tabular data"
     def predict(self, row):
@@ -22,18 +23,18 @@ class TabularLearner(Learner):
         return full_dec,dec_preds[0],preds[0]
 
 # Cell
+@log_args(to_return=True, but_as=Learner.__init__)
 @delegates(Learner.__init__)
-def tabular_learner(dls, layers=None, emb_szs=None, config=None, n_out=None, y_range=None,
-                    ps=None, embed_p=0., use_bn=True, bn_final=False, bn_cont=True, **kwargs):
-    "Get a `Learner` using `data`, with `metrics`, including a `TabularModel` created using the remaining params."
+def tabular_learner(dls, layers=None, emb_szs=None, config=None, n_out=None, y_range=None, **kwargs):
+    "Get a `Learner` using `dls`, with `metrics`, including a `TabularModel` created using the remaining params."
     if config is None: config = tabular_config()
     if layers is None: layers = [200,100]
     to = dls.train_ds
     emb_szs = get_emb_sz(dls.train_ds, {} if emb_szs is None else emb_szs)
     if n_out is None: n_out = get_c(dls)
     assert n_out, "`n_out` is not defined, and could not be infered from data, set `dls.c` or pass `n_out`"
-    model = TabularModel(emb_szs, len(dls.cont_names), n_out, layers, ps=ps, embed_p=embed_p,
-                        y_range=y_range, use_bn=use_bn, bn_final=bn_final, bn_cont=bn_cont, **config)
+    if y_range is None and 'y_range' in config: y_range = config.pop('y_range')
+    model = TabularModel(emb_szs, len(dls.cont_names), n_out, layers, y_range=y_range, **config)
     return TabularLearner(dls, model, **kwargs)
 
 # Cell

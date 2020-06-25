@@ -107,7 +107,7 @@ class GANLoss(GANModule):
 
     def critic(self, real_pred, input):
         "Create some `fake_pred` with the generator from `input` and compare them to `real_pred` in `self.crit_loss_func`."
-        fake = self.gan_model.generator(input.requires_grad_(False)).requires_grad_(True)
+        fake = self.gan_model.generator(input).requires_grad_(False)
         fake_pred = self.gan_model.critic(fake)
         self.crit_loss = self.crit_loss_func(real_pred, fake_pred)
         return self.crit_loss
@@ -263,15 +263,15 @@ def generate_noise(fn, size=100): return cast(torch.randn(size), InvisibleTensor
 
 # Cell
 @typedispatch
-def show_batch(x:InvisibleTensor, y:TensorImage, samples, ctxs=None, max_n=10, rows=None, cols=None, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), rows=rows, cols=cols, figsize=figsize)
+def show_batch(x:InvisibleTensor, y:TensorImage, samples, ctxs=None, max_n=10, nrows=None, ncols=None, figsize=None, **kwargs):
+    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), nrows=nrows, ncols=ncols, figsize=figsize)
     ctxs = show_batch[object](x, y, samples, ctxs=ctxs, max_n=max_n, **kwargs)
     return ctxs
 
 # Cell
 @typedispatch
-def show_results(x:InvisibleTensor, y:TensorImage, samples, outs, ctxs=None, max_n=10, rows=None, cols=None, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), rows=rows, cols=cols, add_vert=1, figsize=figsize)
+def show_results(x:InvisibleTensor, y:TensorImage, samples, outs, ctxs=None, max_n=10, nrows=None, ncols=None, figsize=None, **kwargs):
+    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize)
     ctxs = [b.show(ctx=c, **kwargs) for b,c,_ in zip(outs.itemgot(0),ctxs,range(max_n))]
     return ctxs
 
@@ -303,7 +303,7 @@ class GANLearner(Learner):
         gan = GANModule(generator, critic)
         loss_func = GANLoss(gen_loss_func, crit_loss_func, gan)
         if switcher is None: switcher = FixedGANSwitcher(n_crit=5, n_gen=1)
-        trainer = GANTrainer(clip=clip, switch_eval=switch_eval, show_img=show_img)
+        trainer = GANTrainer(clip=clip, switch_eval=switch_eval, gen_first=gen_first, show_img=show_img)
         cbs = L(cbs) + L(trainer, switcher)
         metrics = L(metrics) + L(*LossMetrics('gen_loss,crit_loss'))
         super().__init__(dls, gan, loss_func=loss_func, cbs=cbs, metrics=metrics, **kwargs)

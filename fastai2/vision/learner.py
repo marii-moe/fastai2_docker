@@ -93,13 +93,14 @@ def create_head(nf, n_out, lin_ftrs=None, ps=0.5, concat_pool=True, bn_final=Fal
 from ..callback.hook import num_features_model
 
 # Cell
-def create_cnn_model(arch, n_out, cut, pretrained, n_in=3, lin_ftrs=None, ps=0.5, custom_head=None,
-                     bn_final=False, concat_pool=True, y_range=None, init=nn.init.kaiming_normal_):
-    "Create custom convnet architecture using `base_arch`"
+@delegates(create_head)
+def create_cnn_model(arch, n_out, cut=None, pretrained=True, n_in=3, init=nn.init.kaiming_normal_, custom_head=None,
+                     concat_pool=True, **kwargs):
+    "Create custom convnet architecture using `arch`, `n_in` and `n_out`"
     body = create_body(arch, n_in, pretrained, cut)
     if custom_head is None:
         nf = num_features_model(nn.Sequential(*body.children())) * (2 if concat_pool else 1)
-        head = create_head(nf, n_out, lin_ftrs, ps=ps, concat_pool=concat_pool, bn_final=bn_final, y_range=y_range)
+        head = create_head(nf, n_out, concat_pool=concat_pool, **kwargs)
     else: head = custom_head
     model = nn.Sequential(body, head)
     if init is not None: apply_init(model[1], init)
@@ -112,7 +113,9 @@ def cnn_config(**kwargs):
     return kwargs
 
 # Cell
-def default_split(m:nn.Module): return L(m[0], m[1:]).map(params)
+def default_split(m):
+    "Default split of a model between body and head"
+    return L(m[0], m[1:]).map(params)
 
 # Cell
 def _xresnet_split(m): return L(m[0][:3], m[0][3:], m[1:]).map(params)
@@ -158,16 +161,18 @@ def _add_norm(dls, meta, pretrained):
     after_batch.add(Normalize.from_stats(*stats))
 
 # Cell
+@log_args(to_return=True, but_as=Learner.__init__)
 @delegates(Learner.__init__)
 def cnn_learner(dls, arch, loss_func=None, pretrained=True, cut=None, splitter=None,
-                y_range=None, config=None, n_in=3, n_out=None, normalize=True, **kwargs):
-    "Build a convnet style learner"
+                y_range=None, config=None, n_out=None, normalize=True, **kwargs):
+    "Build a convnet style learner from `dls` and `arch`"
     if config is None: config = {}
     meta = model_meta.get(arch, _default_meta)
     if n_out is None: n_out = get_c(dls)
     assert n_out, "`n_out` is not defined, and could not be infered from data, set `dls.c` or pass `n_out`"
     if normalize: _add_norm(dls, meta, pretrained)
-    model = create_cnn_model(arch, n_out, ifnone(cut, meta['cut']), pretrained, n_in=n_in, y_range=y_range, **config)
+    if y_range is None and 'y_range' in config: y_range = config.pop('y_range')
+    model = create_cnn_model(arch, n_out, ifnone(cut, meta['cut']), pretrained, y_range=y_range, **config)
     learn = Learner(dls, model, loss_func=loss_func, splitter=ifnone(splitter, meta['split']), **kwargs)
     if pretrained: learn.freeze()
     return learn
@@ -179,6 +184,7 @@ def unet_config(**kwargs):
     return kwargs
 
 # Cell
+@log_args(to_return=True, but_as=Learner.__init__)
 @delegates(Learner.__init__)
 def unet_learner(dls, arch, loss_func=None, pretrained=True, cut=None, splitter=None, config=None, n_in=3, n_out=None,
                  normalize=True, **kwargs):
@@ -197,15 +203,15 @@ def unet_learner(dls, arch, loss_func=None, pretrained=True, cut=None, splitter=
 
 # Cell
 @typedispatch
-def show_results(x:TensorImage, y, samples, outs, ctxs=None, max_n=10, rows=None, cols=None, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), rows=rows, cols=cols, add_vert=1, figsize=figsize)
+def show_results(x:TensorImage, y, samples, outs, ctxs=None, max_n=10, nrows=None, ncols=None, figsize=None, **kwargs):
+    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize)
     ctxs = show_results[object](x, y, samples, outs, ctxs=ctxs, max_n=max_n, **kwargs)
     return ctxs
 
 # Cell
 @typedispatch
-def show_results(x:TensorImage, y:TensorCategory, samples, outs, ctxs=None, max_n=10, rows=None, cols=None, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), rows=rows, cols=cols, add_vert=1, figsize=figsize)
+def show_results(x:TensorImage, y:TensorCategory, samples, outs, ctxs=None, max_n=10, nrows=None, ncols=None, figsize=None, **kwargs):
+    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize)
     for i in range(2):
         ctxs = [b.show(ctx=c, **kwargs) for b,c,_ in zip(samples.itemgot(i),ctxs,range(max_n))]
     ctxs = [r.show(ctx=c, color='green' if b==r else 'red', **kwargs)
@@ -214,8 +220,8 @@ def show_results(x:TensorImage, y:TensorCategory, samples, outs, ctxs=None, max_
 
 # Cell
 @typedispatch
-def show_results(x:TensorImage, y:(TensorMask, TensorPoint, TensorBBox), samples, outs, ctxs=None, max_n=6, rows=None, cols=1, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), rows=rows, cols=cols, add_vert=1, figsize=figsize, double=True,
+def show_results(x:TensorImage, y:(TensorMask, TensorPoint, TensorBBox), samples, outs, ctxs=None, max_n=6, nrows=None, ncols=1, figsize=None, **kwargs):
+    if ctxs is None: ctxs = get_grid(min(len(samples), max_n), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize, double=True,
                                      title='Target/Prediction')
     for i in range(2):
         ctxs[::2] = [b.show(ctx=c, **kwargs) for b,c,_ in zip(samples.itemgot(i),ctxs[::2],range(2*max_n))]
@@ -226,7 +232,7 @@ def show_results(x:TensorImage, y:(TensorMask, TensorPoint, TensorBBox), samples
 # Cell
 @typedispatch
 def show_results(x:TensorImage, y:TensorImage, samples, outs, ctxs=None, max_n=10, figsize=None, **kwargs):
-    if ctxs is None: ctxs = get_grid(3*min(len(samples), max_n), cols=3, figsize=figsize, title='Input/Target/Prediction')
+    if ctxs is None: ctxs = get_grid(3*min(len(samples), max_n), ncols=3, figsize=figsize, title='Input/Target/Prediction')
     for i in range(2):
         ctxs[i::3] = [b.show(ctx=c, **kwargs) for b,c,_ in zip(samples.itemgot(i),ctxs[i::3],range(max_n))]
     ctxs[2::3] = [b.show(ctx=c, **kwargs) for b,c,_ in zip(outs.itemgot(0),ctxs[2::3],range(max_n))]
@@ -234,16 +240,16 @@ def show_results(x:TensorImage, y:TensorImage, samples, outs, ctxs=None, max_n=1
 
 # Cell
 @typedispatch
-def plot_top_losses(x: TensorImage, y:TensorCategory, samples, outs, raws, losses, rows=None, cols=None, figsize=None, **kwargs):
-    axs = get_grid(len(samples), rows=rows, cols=cols, add_vert=1, figsize=figsize, title='Prediction/Actual/Loss/Probability')
+def plot_top_losses(x: TensorImage, y:TensorCategory, samples, outs, raws, losses, nrows=None, ncols=None, figsize=None, **kwargs):
+    axs = get_grid(len(samples), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize, title='Prediction/Actual/Loss/Probability')
     for ax,s,o,r,l in zip(axs, samples, outs, raws, losses):
         s[0].show(ctx=ax, **kwargs)
         ax.set_title(f'{o[0]}/{s[1]} / {l.item():.2f} / {r.max().item():.2f}')
 
 # Cell
 @typedispatch
-def plot_top_losses(x: TensorImage, y:TensorMultiCategory, samples, outs, raws, losses, rows=None, cols=None, figsize=None, **kwargs):
-    axs = get_grid(len(samples), rows=rows, cols=cols, add_vert=1, figsize=figsize)
+def plot_top_losses(x: TensorImage, y:TensorMultiCategory, samples, outs, raws, losses, nrows=None, ncols=None, figsize=None, **kwargs):
+    axs = get_grid(len(samples), nrows=nrows, ncols=ncols, add_vert=1, figsize=figsize)
     for i,(ax,s) in enumerate(zip(axs, samples)): s[0].show(ctx=ax, title=f'Image {i}', **kwargs)
     rows = get_empty_df(len(samples))
     outs = L(s[1:] + o + (TitledStr(r), TitledFloat(l.item())) for s,o,r,l in zip(samples, outs, raws, losses))
