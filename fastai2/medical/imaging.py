@@ -21,6 +21,9 @@ try:
 except: pass
 
 # Cell
+#nbdev_comment _all_ = ['DcmDataset', 'DcmTag', 'DcmMultiValue', 'dcmread', 'get_dicom_files']
+
+# Cell
 def get_dicom_files(path, recurse=True, folders=None):
     "Get dicom files in `path` recursively, only in `folders`, if specified."
     return get_files(path, extensions=[".dcm"], recurse=recurse, folders=folders)
@@ -41,7 +44,7 @@ class PILDicom(PILBase):
     def create(cls, fn:(Path,str,bytes), mode=None)->None:
         "Open a `DICOM file` from path `fn` or bytes `fn` and load it as a `PIL Image`"
         if isinstance(fn,bytes): im = Image.fromarray(pydicom.dcmread(pydicom.filebase.DicomBytesIO(fn)).pixel_array)
-        if isinstance(fn,Path): im = Image.fromarray(dcmread(fn).pixel_array)
+        if isinstance(fn,(Path,str)): im = Image.fromarray(dcmread(fn).pixel_array)
         im.load()
         im = im._new(im.im)
         return cls(im.convert(mode) if mode else im)

@@ -174,7 +174,7 @@ class LMLearner(TextLearner):
 
         num = self.dls.train_ds.numericalize
         tokens = [num.vocab[i] for i in idxs_all if num.vocab[i] not in [BOS, PAD]]
-        sep = self.dls.train_ds.tokenizer[-1].sep
+        sep = self.dls.train_ds.tokenizer.sep
         return sep.join(decoder(tokens))
 
     @delegates(Learner.get_preds)
@@ -198,7 +198,7 @@ def language_model_learner(dls, arch, config=None, drop_mult=1., backwards=False
     model = get_language_model(arch, len(vocab), config=config, drop_mult=drop_mult)
     meta = _model_meta[arch]
     learn = LMLearner(dls, model, loss_func=CrossEntropyLossFlat(), splitter=meta['split_lm'], **kwargs)
-    url = 'url_bwd' if data.backwards else 'url'
+    url = 'url_bwd' if backwards else 'url'
     if pretrained or pretrained_fnames:
         if pretrained_fnames is not None:
             fnames = [learn.path/learn.model_dir/f'{fn}.{ext}' for fn,ext in zip(pretrained_fnames, ['pth', 'pkl'])]

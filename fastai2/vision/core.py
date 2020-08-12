@@ -12,6 +12,9 @@ from ..data.all import *
 from PIL import Image
 
 # Cell
+#nbdev_comment _all_ = ['Image','ToTensor']
+
+# Cell
 imagenet_stats = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 cifar_stats    = ([0.491, 0.482, 0.447], [0.247, 0.243, 0.261])
 mnist_stats    = ([0.131], [0.308])
@@ -69,9 +72,9 @@ def resize_max(x: Image.Image, resample=0, max_px=None, max_h=None, max_w=None):
     return x.reshape(round(h), round(w), resample=resample)
 
 # Cell
-def load_image(fn, mode=None, **kwargs):
+def load_image(fn, mode=None):
     "Open and load a `PIL.Image` and convert to `mode`"
-    im = Image.open(fn, **kwargs)
+    im = Image.open(fn)
     im.load()
     im = im._new(im.im)
     return im.convert(mode) if mode else im
@@ -248,7 +251,6 @@ class PointScaler(Transform):
 # Cell
 class BBoxLabeler(Transform):
     def setups(self, dl): self.vocab = dl.vocab
-    def before_call(self): self.bbox,self.lbls = None,None
 
     def decode (self, x, **kwargs):
         self.bbox,self.lbls = None,None

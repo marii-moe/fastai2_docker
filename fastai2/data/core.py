@@ -29,6 +29,9 @@ def show_results(x, y, samples, outs, ctxs=None, max_n=9, **kwargs):
     return ctxs
 
 # Cell
+#nbdev_comment _all_ = ["show_batch", "show_results"]
+
+# Cell
 _batch_tfms = ('after_item','before_batch','after_batch')
 
 # Cell
@@ -126,7 +129,7 @@ class DataLoaders(GetAttr):
     _default='train'
     def __init__(self, *loaders, path='.', device=None):
         self.loaders,self.path = list(loaders),Path(path)
-        self.device = device
+        if device is not None or hasattr(loaders[0],'to'): self.device = device
 
     def __getitem__(self, i): return self.loaders[i]
     def new_empty(self):
@@ -248,6 +251,7 @@ class TfmdLists(FilteredBase, L, GetAttr):
         self.pretty_types = '\n'.join([f'  - {t}' for t in types])
 
     def infer_idx(self, x):
+        # TODO: check if we really need this, or can simplify
         idx = 0
         for t in self.types:
             if isinstance(x, t): break
